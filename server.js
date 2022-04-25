@@ -1,4 +1,6 @@
-//  import express 
+//  import express and mysql2
+const mysql = require('mysql2');
+// const dotenv = require('dotenv');
 const express = require('express');
 
 // server local 
@@ -8,6 +10,21 @@ const app = express();
 //  express middleware
 app.use(express.urlencoded({ extended: false}));
 app.use(express.json());
+
+// connect to the database 
+const db = mysql.createConnection(
+    {
+        host: 'localhost',
+        user: '',
+        password: '',
+        database: 'election'
+    },
+    console.log('Connected to the election database')
+);
+
+db.query(`SELECT * FROM candidates`, (err, rows) => {
+    console.log(rows);
+});
 
 // handle user requests that are not supported (404 not found)
 app.use((req,res) => {
