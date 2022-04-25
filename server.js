@@ -3,6 +3,9 @@ const express = require("express");
 const mysql = require('mysql2');
 const e = require('express');
 const inputCheck = require('./utils/inputCheck');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 // server local 
 const PORT = process.env.PORT ||3001;
@@ -15,10 +18,10 @@ app.use(express.json());
 // connect to the database 
 const db = mysql.createConnection(
     {
-        host: 'localhost',
-        user: '',
-        password: '',
-        database: 'election'
+        host: process.env.host,
+        user: process.env.user,
+        password: process.env.password,
+        database: process.env.database
     },
     console.log('Connected to the election database')
 );
@@ -91,8 +94,8 @@ app.post('/api/candidate', ({ body }, res) => {
         return;
     }
 
-    const sql = `INSERT INTO candidates (id, first_name, last_name, industry_connected)
-        VALUES (?,?,?,?)`;
+    const sql = `INSERT INTO candidates (first_name, last_name, industry_connected)
+        VALUES (?,?,?)`;
     const params = [body.first_name, body.last_name, body.industry_connected];
 
     db.query(sql, params, (err, result) => {
