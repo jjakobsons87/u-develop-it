@@ -3,9 +3,10 @@ const express = require("express");
 const mysql = require('mysql2');
 const e = require('express');
 const inputCheck = require('./utils/inputCheck');
-const dotenv = require('dotenv');
+const path = require('path');
 
-dotenv.config();
+require('dotenv').config({ path: path.resolve(__dirname, './.env') });
+// dotenv.config();
 
 // server local 
 const PORT = process.env.PORT ||3001;
