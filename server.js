@@ -11,7 +11,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // use apiRoutes
-app.use('api', apiRoutes);
+app.use('/api', apiRoutes);
 
 // handle user requests that are not supported (404 not found)
 app.use((req, res) => {
