@@ -1,21 +1,10 @@
-const db = require('./db/connection');
-//  import express and mysql2
 const express = require("express");
-const apiRoutes = require('./routes/apiRoutes');
-const e = require("express");
-const inputCheck = require("./utils/inputCheck");
-
-// server local
-const PORT = process.env.PORT || 3001;
-const app = express();
-
-//  express middleware
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-app.use('api', apiRoutes);
+const router = express.Router();
+const db = require("../../db/connection");
+const inputCheck = require("../../utils/inputCheck");
 
 //  pull list of candidates from DB
-app.get("/api/candidates", (req, res) => {
+router.get("/candidates", (req, res) => {
     const sql = `SELECT candidates.*, parties.name 
         AS party_name 
         FROM candidates 
@@ -35,7 +24,7 @@ app.get("/api/candidates", (req, res) => {
 });
 
 // GET a single candidate
-app.get("/api/candidate/:id", (req, res) => {
+router.get("/candidate/:id", (req, res) => {
     const sql = `SELECT candidates.*, parties.name 
         AS party_name 
         FROM candidates 
@@ -56,30 +45,8 @@ app.get("/api/candidate/:id", (req, res) => {
     });
 });
 
-// delete a candidate
-app.delete("/api/candidate/:id", (req, res) => {
-    const sql = `DELETE FROM candidates WHERE id = ?`;
-    const params = [req.params.id];
-
-    db.query(sql, params, (err, result) => {
-        if (err) {
-        res.statusMessage(400).json({ error: res.message });
-        } else if (!result.affectedRows) {
-        res.json({
-            message: "Candidate not found",
-        });
-        } else {
-        res.json({
-            message: "deleted",
-            changes: result.affectedRows,
-            id: req.params.id,
-        });
-        }
-    });
-});
-
 // Create a candidate
-app.post("/api/candidate", ({ body }, res) => {
+router.post("/candidate", ({ body }, res) => {
     const errors = inputCheck(
         body,
         "first_name",
@@ -108,7 +75,7 @@ app.post("/api/candidate", ({ body }, res) => {
 });
 
 // update a candidate's party 
-app.put('/api/candidate/:id', (req, res) => {
+router.put('/candidate/:id', (req, res) => {
     const errors = inputCheck(req.body, 'party_id');
     if(errors) {
         res.status(400).json({ error: errors });
@@ -136,67 +103,26 @@ app.put('/api/candidate/:id', (req, res) => {
     });
 });
 
-// get all party info 
-app.get('/api/parties', (req, res) => {
-    const sql = `SELECT * FROM parties`;
-    db.query(sql, (err, rows) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-        }
-        res.json({
-            message: 'success',
-            data: rows
-        });
-    });
-});
-
-// get a party by ID 
-app.get('/api/party/:id', (req, res) => {
-    const sql = `SELECT * FROM parties WHERE id = ?`;
+// delete a candidate
+router.delete("/candidate/:id", (req, res) => {
+    const sql = `DELETE FROM candidates WHERE id = ?`;
     const params = [req.params.id];
-    db.query(sql, params, (err, row) => {
-        if (err) {
-            res.status(400).json({ error: err.message });
-            return;
-        }
-        res.json({
-            message: 'success',
-            data: row
-        });
-    });
-});
 
-// delete a party by id
-app.delete('/api/party/:id', (req, res) => {
-    const sql = `DELETE FROM parties WHERE id = ?`;
-    const params = [req.params.id];
     db.query(sql, params, (err, result) => {
         if (err) {
-            res.status(400).json({ error: res.message });
-            // checks if anything was deleted 
+        res.statusMessage(400).json({ error: res.message });
         } else if (!result.affectedRows) {
-            res.json({
-                message: 'Party not found'
-            });
+        res.json({
+            message: "Candidate not found",
+        });
         } else {
-            res.json({
-                message: 'deleted',
-                changes: result.affectedRows,
-                id: req.params.id
-            });
+        res.json({
+            message: "deleted",
+            changes: result.affectedRows,
+            id: req.params.id,
+        });
         }
     });
 });
 
-// handle user requests that are not supported (404 not found)
-app.use((req, res) => {
-    res.status(404).end();
-});
-
-//  start express.js on port 3001
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
-
-module.exports = db;
+module.exports = router;
